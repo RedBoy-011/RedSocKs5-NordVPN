@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+command -v docker >/dev/null || { echo 'Docker is not installed.'; exit 1; }
+echo '=== RedSocKs5-NordVPN setup ==='
+echo 'This legacy compose setup requires NordVPN Service Credentials (not app login token).'
+read -rp 'NordVPN service username: ' user
+read -rsp 'NordVPN service password: ' pass; echo
+keys=(DE GR BG RO AT); defaults=(Germany Greece Bulgaria Romania Austria); ports=(1081 1082 1083 1084 1085)
+{
+  printf 'NORDVPN_USERNAME=%s\nNORDVPN_PASSWORD=%s\n' "$user" "$pass"
+  for i in "${!keys[@]}"; do
+    read -rp "Country ${keys[$i]} [${defaults[$i]}]: " country; country=${country:-${defaults[$i]}}
+    read -rp "Fixed SOCKS port ${keys[$i]} [${ports[$i]}]: " port; port=${port:-${ports[$i]}}
+    printf 'LOC_%s=%s\nPORT_%s=%s\n' "${keys[$i]}" "$country" "${keys[$i]}" "$port"
+  done
+  echo 'TZ=Europe/Istanbul'
+} > .env
+chmod 600 .env
+docker compose up -d
+docker compose ps
