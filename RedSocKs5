@@ -55,7 +55,7 @@ auto=${auto:-Y}
   for ((i=0;i<count;i++)); do
     if [[ "$auto" =~ ^[Yy]$ ]]; then
       country=${defaults[$i]}
-      echo "Auto-selected ${keys[$i]}: $country"
+      echo "Auto-selected ${keys[$i]}: $country" >&2
     else
       read -rp "Country ${keys[$i]} [${defaults[$i]}]: " country; country=${country:-${defaults[$i]}}
     fi
