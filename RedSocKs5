@@ -1,11 +1,36 @@
 #!/usr/bin/env bash
 set -euo pipefail
 echo '=== RedSocKs5-NordVPN ==='
+if [[ "${EUID}" -ne 0 ]]; then echo 'Please run as root: sudo ./RedSocKs5'; exit 1; fi
+source /etc/os-release
+case "${ID:-}" in ubuntu|debian) ;; *) echo "Unsupported OS: ${ID:-unknown}. Ubuntu/Debian required."; exit 1;; esac
+apt-get update -y
+apt-get install -y ca-certificates curl sudo
+
+install_nordvpn_cli() {
+  if ! command -v nordvpn >/dev/null 2>&1; then
+    echo 'Installing official NordVPN Linux CLI...'
+    sh <(curl -fsSL https://downloads.nordcdn.com/apps/linux/install.sh)
+  fi
+  systemctl enable --now nordvpnd 2>/dev/null || true
+}
+
+install_docker() {
+  if ! command -v docker >/dev/null 2>&1; then
+    echo 'Installing Docker Engine and Compose plugin...'
+    apt-get install -y docker.io docker-compose-plugin
+    systemctl enable --now docker
+  elif ! docker compose version >/dev/null 2>&1; then
+    apt-get install -y docker-compose-plugin
+  fi
+  modprobe tun 2>/dev/null || true
+}
+
 echo '1) Token (official NordVPN CLI: one active system-wide location)'
 echo '2) Service credentials (multi-location Docker/SOCKS5)'
 read -rp 'Authentication mode [1/2]: ' mode
 if [[ "${mode:-1}" == "1" ]]; then
-  command -v nordvpn >/dev/null || { echo 'NordVPN CLI is not installed.'; exit 1; }
+  install_nordvpn_cli
   read -rsp 'NordVPN access token: ' token; echo
   read -rp 'Country (e.g. Germany): ' country
   read -rp 'Local SOCKS port [1081]: ' port; port=${port:-1081}
@@ -17,7 +42,7 @@ if [[ "${mode:-1}" == "1" ]]; then
   exit 0
 fi
 [[ "${mode:-}" == "2" ]] || { echo 'Invalid mode.'; exit 1; }
-command -v docker >/dev/null || { echo 'Docker is not installed.'; exit 1; }
+install_docker
 read -rp 'NordVPN service username: ' user
 read -rsp 'NordVPN service password: ' pass; echo
 read -rp 'Number of locations (1-5) [5]: ' count; count=${count:-5}
