@@ -25,4 +25,10 @@ else
 fi
 
 chmod +x RedSocKs5
-exec ./RedSocKs5
+# The installer may itself be run through curl|bash. Force the interactive
+# menu to read from the terminal instead of the exhausted download pipe.
+if [[ -r /dev/tty ]]; then
+  exec ./RedSocKs5 </dev/tty
+else
+  exec ./RedSocKs5
+fi

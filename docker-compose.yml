@@ -17,6 +17,8 @@ services:
   socks-de:
     image: serjs/go-socks5-proxy:latest
     network_mode: service:vpn-de
+    environment:
+      - REQUIRE_AUTH=false
     depends_on: {vpn-de: {condition: service_healthy}}
     restart: unless-stopped
 
@@ -38,6 +40,8 @@ services:
   socks-gr:
     image: serjs/go-socks5-proxy:latest
     network_mode: service:vpn-gr
+    environment:
+      - REQUIRE_AUTH=false
     depends_on: {vpn-gr: {condition: service_healthy}}
     restart: unless-stopped
 
@@ -59,6 +63,8 @@ services:
   socks-bg:
     image: serjs/go-socks5-proxy:latest
     network_mode: service:vpn-bg
+    environment:
+      - REQUIRE_AUTH=false
     depends_on: {vpn-bg: {condition: service_healthy}}
     restart: unless-stopped
 
@@ -80,6 +86,8 @@ services:
   socks-ro:
     image: serjs/go-socks5-proxy:latest
     network_mode: service:vpn-ro
+    environment:
+      - REQUIRE_AUTH=false
     depends_on: {vpn-ro: {condition: service_healthy}}
     restart: unless-stopped
 
@@ -101,5 +109,7 @@ services:
   socks-at:
     image: serjs/go-socks5-proxy:latest
     network_mode: service:vpn-at
+    environment:
+      - REQUIRE_AUTH=false
     depends_on: {vpn-at: {condition: service_healthy}}
     restart: unless-stopped
