@@ -11,7 +11,7 @@ services:
       - OPENVPN_PASSWORD=${NORDVPN_PASSWORD}
       - SERVER_COUNTRIES=${LOC_DE:-Germany}
       - TZ=${TZ:-Europe/Istanbul}
-    ports: ["${PORT_DE:-1081}:1080"]
+    ports: ["127.0.0.1:${PORT_DE:-1081}:1080"]
     restart: unless-stopped
 
   socks-de:
@@ -34,7 +34,7 @@ services:
       - OPENVPN_PASSWORD=${NORDVPN_PASSWORD}
       - SERVER_COUNTRIES=${LOC_GR:-Greece}
       - TZ=${TZ:-Europe/Istanbul}
-    ports: ["${PORT_GR:-1082}:1080"]
+    ports: ["127.0.0.1:${PORT_GR:-1082}:1080"]
     restart: unless-stopped
 
   socks-gr:
@@ -57,7 +57,7 @@ services:
       - OPENVPN_PASSWORD=${NORDVPN_PASSWORD}
       - SERVER_COUNTRIES=${LOC_BG:-Bulgaria}
       - TZ=${TZ:-Europe/Istanbul}
-    ports: ["${PORT_BG:-1083}:1080"]
+    ports: ["127.0.0.1:${PORT_BG:-1083}:1080"]
     restart: unless-stopped
 
   socks-bg:
@@ -80,7 +80,7 @@ services:
       - OPENVPN_PASSWORD=${NORDVPN_PASSWORD}
       - SERVER_COUNTRIES=${LOC_RO:-Romania}
       - TZ=${TZ:-Europe/Istanbul}
-    ports: ["${PORT_RO:-1084}:1080"]
+    ports: ["127.0.0.1:${PORT_RO:-1084}:1080"]
     restart: unless-stopped
 
   socks-ro:
@@ -103,7 +103,7 @@ services:
       - OPENVPN_PASSWORD=${NORDVPN_PASSWORD}
       - SERVER_COUNTRIES=${LOC_AT:-Austria}
       - TZ=${TZ:-Europe/Istanbul}
-    ports: ["${PORT_AT:-1085}:1080"]
+    ports: ["127.0.0.1:${PORT_AT:-1085}:1080"]
     restart: unless-stopped
 
   socks-at:
@@ -126,7 +126,7 @@ services:
       - OPENVPN_PASSWORD=${NORDVPN_PASSWORD}
       - SERVER_COUNTRIES=${LOC_FR:-France}
       - TZ=${TZ:-Europe/Istanbul}
-    ports: ["${PORT_FR:-1086}:1080"]
+    ports: ["127.0.0.1:${PORT_FR:-1086}:1080"]
     restart: unless-stopped
 
   socks-fr:
@@ -148,7 +148,7 @@ services:
       - OPENVPN_PASSWORD=${NORDVPN_PASSWORD}
       - SERVER_COUNTRIES=${LOC_PL:-Poland}
       - TZ=${TZ:-Europe/Istanbul}
-    ports: ["${PORT_PL:-1087}:1080"]
+    ports: ["127.0.0.1:${PORT_PL:-1087}:1080"]
     restart: unless-stopped
 
   socks-pl:
