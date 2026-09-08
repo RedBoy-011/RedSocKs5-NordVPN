@@ -66,8 +66,10 @@ docker compose ps
 ### نصب تک‌خطی
 
 ```bash
-git clone https://github.com/RedBoy-011/RedSocKs5-NordVPN.git && cd RedSocKs5-NordVPN && chmod +x RedSocKs5 && ./RedSocKs5
+curl -fsSL https://raw.githubusercontent.com/RedBoy-011/RedSocKs5-NordVPN/main/install.sh | sudo bash
 ```
+
+این دستور همهٔ مراحل را خودکار انجام می‌دهد: نصب Git و ابزارهای لازم، دریافت یا به‌روزرسانی امن پروژه، پشتیبان‌گیری از تغییرات محلی و اجرای منوی `RedSocKs5`. اگر پوشهٔ پروژه از قبل وجود داشته باشد، دوباره `git clone` اجرا نمی‌شود.
 
 در `.env` این دو مقدار را وارد کنید:
 
