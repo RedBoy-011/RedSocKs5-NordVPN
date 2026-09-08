@@ -45,10 +45,10 @@ fi
 install_docker
 read -rp 'NordVPN service username: ' user
 read -rsp 'NordVPN service password: ' pass; echo
-read -rp 'Number of locations (1-5) [5]: ' count; count=${count:-5}
-[[ "$count" =~ ^[1-5]$ ]] || { echo 'Count must be 1..5'; exit 1; }
-keys=(DE GR BG RO AT); ports=(1081 1082 1083 1084 1085)
-candidates=(Germany Romania Bulgaria Austria Italy Hungary Netherlands France Poland Switzerland Czech_Republic Serbia Greece Spain)
+read -rp 'Number of locations (1-7) [5]: ' count; count=${count:-5}
+[[ "$count" =~ ^[1-7]$ ]] || { echo 'Count must be 1..7'; exit 1; }
+keys=(DE GR BG RO AT FR PL); ports=(1081 1082 1083 1084 1085 1086 1087)
+candidates=(Germany Romania Bulgaria Austria Italy Hungary Netherlands France Poland Switzerland Czech_Republic Serbia Greece Spain Sweden Denmark)
 {
   printf 'NORDVPN_USERNAME=%s\nNORDVPN_PASSWORD=%s\n' "$user" "$pass"
   for k in "${keys[@]}"; do printf 'LOC_%s=%s\nPORT_%s=%s\n' "$k" '' "$k" ''; done

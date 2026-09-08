@@ -113,3 +113,47 @@ services:
       - REQUIRE_AUTH=false
     depends_on: {vpn-at: {condition: service_healthy}}
     restart: unless-stopped
+
+  vpn-fr:
+    image: qmcgaw/gluetun:v3.40.0
+    container_name: nord-socks-fr
+    cap_add: [NET_ADMIN]
+    devices: [/dev/net/tun:/dev/net/tun]
+    environment:
+      - VPN_SERVICE_PROVIDER=nordvpn
+      - VPN_TYPE=openvpn
+      - OPENVPN_USER=${NORDVPN_USERNAME}
+      - OPENVPN_PASSWORD=${NORDVPN_PASSWORD}
+      - SERVER_COUNTRIES=${LOC_FR:-France}
+      - TZ=${TZ:-Europe/Istanbul}
+    ports: ["${PORT_FR:-1086}:1080"]
+    restart: unless-stopped
+
+  socks-fr:
+    image: serjs/go-socks5-proxy:latest
+    network_mode: service:vpn-fr
+    environment: [REQUIRE_AUTH=false]
+    depends_on: {vpn-fr: {condition: service_healthy}}
+    restart: unless-stopped
+
+  vpn-pl:
+    image: qmcgaw/gluetun:v3.40.0
+    container_name: nord-socks-pl
+    cap_add: [NET_ADMIN]
+    devices: [/dev/net/tun:/dev/net/tun]
+    environment:
+      - VPN_SERVICE_PROVIDER=nordvpn
+      - VPN_TYPE=openvpn
+      - OPENVPN_USER=${NORDVPN_USERNAME}
+      - OPENVPN_PASSWORD=${NORDVPN_PASSWORD}
+      - SERVER_COUNTRIES=${LOC_PL:-Poland}
+      - TZ=${TZ:-Europe/Istanbul}
+    ports: ["${PORT_PL:-1087}:1080"]
+    restart: unless-stopped
+
+  socks-pl:
+    image: serjs/go-socks5-proxy:latest
+    network_mode: service:vpn-pl
+    environment: [REQUIRE_AUTH=false]
+    depends_on: {vpn-pl: {condition: service_healthy}}
+    restart: unless-stopped
