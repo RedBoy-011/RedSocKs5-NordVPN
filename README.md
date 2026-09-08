@@ -51,7 +51,7 @@ chmod +x RedSocKs5
 ./RedSocKs5
 ```
 
-رمز هنگام ورود نمایش داده نمی‌شود و تنظیمات در فایل خصوصی `.env` ذخیره می‌گردد. توجه کنید توکن ورود اپلیکیشن NordVPN مستقیماً رمز OpenVPN نیست.
+منو در ابتدا حالت احراز هویت را می‌پرسد: Token برای CLI رسمی NordVPN یا Service Credentials برای چند SOCKS مستقل. حالت Token فقط یک مسیر VPN فعال دارد؛ برای چند لوکیشن هم‌زمان باید حالت Service Credentials را انتخاب کنید. تعداد لوکیشن (۱ تا ۵)، کشور و پورت ثابت هر مورد قابل تنظیم است.
 
 ```bash
 git clone https://github.com/RedBoy-011/RedSocKs5-NordVPN.git RedSocKs5-NordVPN

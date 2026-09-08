@@ -1,14 +1,31 @@
 #!/usr/bin/env bash
 set -euo pipefail
+echo '=== RedSocKs5-NordVPN ==='
+echo '1) Token (official NordVPN CLI: one active system-wide location)'
+echo '2) Service credentials (multi-location Docker/SOCKS5)'
+read -rp 'Authentication mode [1/2]: ' mode
+if [[ "${mode:-1}" == "1" ]]; then
+  command -v nordvpn >/dev/null || { echo 'NordVPN CLI is not installed.'; exit 1; }
+  read -rsp 'NordVPN access token: ' token; echo
+  read -rp 'Country (e.g. Germany): ' country
+  read -rp 'Local SOCKS port [1081]: ' port; port=${port:-1081}
+  nordvpn login --token "$token"
+  nordvpn connect "$country"
+  echo "Connected to $country with official CLI."
+  echo 'Token mode supports one active VPN route; five simultaneous SOCKS locations require mode 2.'
+  echo "Selected panel port: 127.0.0.1:$port (configure a SOCKS daemon separately)."
+  exit 0
+fi
+[[ "${mode:-}" == "2" ]] || { echo 'Invalid mode.'; exit 1; }
 command -v docker >/dev/null || { echo 'Docker is not installed.'; exit 1; }
-echo '=== RedSocKs5-NordVPN setup ==='
-echo 'This legacy compose setup requires NordVPN Service Credentials (not app login token).'
 read -rp 'NordVPN service username: ' user
 read -rsp 'NordVPN service password: ' pass; echo
+read -rp 'Number of locations (1-5) [5]: ' count; count=${count:-5}
+[[ "$count" =~ ^[1-5]$ ]] || { echo 'Count must be 1..5'; exit 1; }
 keys=(DE GR BG RO AT); defaults=(Germany Greece Bulgaria Romania Austria); ports=(1081 1082 1083 1084 1085)
 {
   printf 'NORDVPN_USERNAME=%s\nNORDVPN_PASSWORD=%s\n' "$user" "$pass"
-  for i in "${!keys[@]}"; do
+  for ((i=0;i<count;i++)); do
     read -rp "Country ${keys[$i]} [${defaults[$i]}]: " country; country=${country:-${defaults[$i]}}
     read -rp "Fixed SOCKS port ${keys[$i]} [${ports[$i]}]: " port; port=${port:-${ports[$i]}}
     printf 'LOC_%s=%s\nPORT_%s=%s\n' "${keys[$i]}" "$country" "${keys[$i]}" "$port"
