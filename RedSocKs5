@@ -48,10 +48,17 @@ read -rsp 'NordVPN service password: ' pass; echo
 read -rp 'Number of locations (1-5) [5]: ' count; count=${count:-5}
 [[ "$count" =~ ^[1-5]$ ]] || { echo 'Count must be 1..5'; exit 1; }
 keys=(DE GR BG RO AT); defaults=(Germany Greece Bulgaria Romania Austria); ports=(1081 1082 1083 1084 1085)
+read -rp 'Use automatic nearby-country selection? [Y/n]: ' auto
+auto=${auto:-Y}
 {
   printf 'NORDVPN_USERNAME=%s\nNORDVPN_PASSWORD=%s\n' "$user" "$pass"
   for ((i=0;i<count;i++)); do
-    read -rp "Country ${keys[$i]} [${defaults[$i]}]: " country; country=${country:-${defaults[$i]}}
+    if [[ "$auto" =~ ^[Yy]$ ]]; then
+      country=${defaults[$i]}
+      echo "Auto-selected ${keys[$i]}: $country"
+    else
+      read -rp "Country ${keys[$i]} [${defaults[$i]}]: " country; country=${country:-${defaults[$i]}}
+    fi
     read -rp "Fixed SOCKS port ${keys[$i]} [${ports[$i]}]: " port; port=${port:-${ports[$i]}}
     printf 'LOC_%s=%s\nPORT_%s=%s\n' "${keys[$i]}" "$country" "${keys[$i]}" "$port"
   done
