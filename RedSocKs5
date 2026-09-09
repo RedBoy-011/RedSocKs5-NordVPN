@@ -52,12 +52,68 @@ update_project() {
   exec bash "$PROJECT_DIR/RedSocKs5"
 }
 
+wait_healthy() {
+  local name="$1"; local deadline=$((SECONDS+90)); local state
+  while (( SECONDS < deadline )); do
+    state=$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$name" 2>/dev/null || true)
+    [[ "$state" == healthy ]] && return 0
+    sleep 3
+  done
+  return 1
+}
+
+wait_socks() {
+  local port="$1"; local deadline=$((SECONDS+60))
+  while (( SECONDS < deadline )); do
+    if curl --silent --show-error --fail --max-time 12 --socks5-hostname "127.0.0.1:${port}" https://ifconfig.me/ip >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep 3
+  done
+  return 1
+}
+
+start_saved_locations() {
+  install_docker
+  cd "$PROJECT_DIR"
+  [[ -s .env ]] || { echo 'Missing .env. Select option 2 to configure Service Credentials first.'; exit 1; }
+
+  local key short port country
+  local -a services=()
+  local -a keys=(DE GR BG RO AT FR PL)
+  for key in "${keys[@]}"; do
+    country=$(sed -n "s/^LOC_${key}=//p" .env | head -n1)
+    [[ -n "$country" ]] || continue
+    short=${key,,}
+    services+=("vpn-${short}" "socks-${short}")
+  done
+  ((${#services[@]})) || { echo 'No saved locations found. Select option 2 to search for locations.'; exit 1; }
+
+  echo 'Starting saved locations; no new country search will be performed...'
+  docker compose up -d "${services[@]}"
+  echo
+  for key in "${keys[@]}"; do
+    country=$(sed -n "s/^LOC_${key}=//p" .env | head -n1)
+    [[ -n "$country" ]] || continue
+    port=$(sed -n "s/^PORT_${key}=//p" .env | head -n1)
+    short=${key,,}
+    if wait_healthy "nord-socks-${short}" && wait_socks "$port"; then
+      echo "OK: SOCKS 127.0.0.1:${port} -> ${country}"
+    else
+      echo "FAILED: SOCKS 127.0.0.1:${port} -> ${country}; use option 4 to replace only this location."
+    fi
+  done
+  echo
+  docker compose ps
+}
+
 echo '1) Token (official NordVPN CLI: one active system-wide location)'
 echo '2) Service credentials (multi-location Docker/SOCKS5)'
 echo '3) Update project from GitHub'
 echo '4) Repair one SOCKS port'
 echo '5) Show service status'
-read -rp 'Select [1/2/3/4/5]: ' mode
+echo '6) Start and test saved locations (no new country search)'
+read -rp 'Select [1/2/3/4/5/6]: ' mode
 [[ "${mode:-}" == "3" ]] && update_project
 if [[ "${mode:-}" == "4" ]]; then
   [[ -f "$PROJECT_DIR/repair-port.sh" ]] || { echo 'repair-port.sh is missing. Select option 3 first.'; exit 1; }
@@ -67,6 +123,10 @@ fi
 if [[ "${mode:-}" == "5" ]]; then
   cd "$PROJECT_DIR"
   docker compose ps
+  exit 0
+fi
+if [[ "${mode:-}" == "6" ]]; then
+  start_saved_locations
   exit 0
 fi
 if [[ "${mode:-1}" == "1" ]]; then
@@ -92,20 +152,15 @@ keys=(DE GR BG RO AT FR PL); ports=(1081 1082 1083 1084 1085 1086 1087)
 candidates=(Germany United_States United_Kingdom France Netherlands Italy Austria Romania Bulgaria Poland Switzerland Hungary Czech_Republic Serbia Greece Spain Sweden Denmark)
 {
   printf 'NORDVPN_USERNAME=%s\nNORDVPN_PASSWORD=%s\n' "$user" "$pass"
+  printf 'ACTIVE_LOCATION_COUNT=%s\n' "$count"
   for k in "${keys[@]}"; do printf 'LOC_%s=%s\nPORT_%s=%s\n' "$k" '' "$k" ''; done
   echo 'TZ=Europe/Istanbul'
 } > .env
 chmod 600 .env
 
-wait_healthy() {
-  local name="$1"; local deadline=$((SECONDS+90)); local state
-  while (( SECONDS < deadline )); do
-    state=$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$name" 2>/dev/null || true)
-    [[ "$state" == healthy ]] && return 0
-    sleep 3
-  done
-  return 1
-}
+for ((i=count;i<${#keys[@]};i++)); do
+  docker compose rm -sf "socks-${keys[$i],,}" "vpn-${keys[$i],,}" >/dev/null 2>&1 || true
+done
 
 used='|'
 success=0
@@ -117,7 +172,7 @@ for ((i=0;i<count;i++)); do
     sed -i "s/^LOC_${key}=.*/LOC_${key}=${country}/" .env
     sed -i "s/^PORT_${key}=.*/PORT_${key}=${port}/" .env
     docker compose up -d --force-recreate "vpn-${key,,}" "socks-${key,,}" >/dev/null 2>&1 || true
-    if wait_healthy "nord-socks-${key,,}"; then
+    if wait_healthy "nord-socks-${key,,}" && wait_socks "$port"; then
       found="$country"; used="${used}${country}|"; success=$((success+1))
       echo "OK: SOCKS 127.0.0.1:$port -> $country"
       break
