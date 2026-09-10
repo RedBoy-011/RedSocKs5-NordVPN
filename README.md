@@ -98,6 +98,27 @@ sudo ./RedSocKs5
 ```bash
 curl -fsSL https://raw.githubusercontent.com/RedBoy-011/RedSocKs5-NordVPN/main/install.sh | sudo bash
 ```
+### در صورت ارور نصب پیشنیاز داکر
+
+```bash
+# 1. نصب پیش‌نیازها و اضافه کردن کلید GPG داکر
+sudo apt-get update
+sudo apt-get install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+# 2. اضافه کردن مخزن به منابع apt
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  
+sudo apt-get update
+
+# 3. نصب داکر انجین و افزونه کامپوز
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin
+```
 
 این دستور همهٔ مراحل را خودکار انجام می‌دهد: نصب Git و ابزارهای لازم، دریافت یا به‌روزرسانی امن پروژه، پشتیبان‌گیری از تغییرات محلی و اجرای تعاملی منوی `RedSocKs5`. منو از `/dev/tty` می‌خواند تا هنگام اجرای `curl | bash` ورودی‌ها گم نشوند. اگر پوشهٔ پروژه از قبل وجود داشته باشد، دوباره `git clone` اجرا نمی‌شود.
 
